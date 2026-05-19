@@ -47,7 +47,7 @@ function getS3Client(): S3Client {
       accessKeyId: requiredEnv("S3_ACCESS_KEY_ID"),
       secretAccessKey: requiredEnv("S3_SECRET_ACCESS_KEY"),
     },
-    forcePathStyle: true,
+    forcePathStyle: false,
   });
 
   return cachedClient;
