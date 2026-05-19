@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 
+type ScheduleItem = {
+  time: string;
+  title: string;
+  description: string;
+  highlight: boolean;
+  speakers?: string[];
+};
+
 export default function ScheduleSection() {
   const [activeDay, setActiveDay] = useState<1 | 2>(1);
 
-  const day1 = [
+  const day1: ScheduleItem[] = [
     {
       time: "08:30 AM",
       title: "Registration",
@@ -74,7 +82,7 @@ export default function ScheduleSection() {
     },
   ];
 
-  const day2 = [
+  const day2: ScheduleItem[] = [
     {
       time: "09:30 – 10:00 AM",
       title: "Breakfast (Networking Session 4)",
@@ -217,7 +225,7 @@ export default function ScheduleSection() {
                 {item.description && (
                   <p className="text-gray-500 text-sm">{item.description}</p>
                 )}
-                {"speakers" in item && item.speakers && (
+                {item.speakers?.length ? (
                   <ul className="mt-3 space-y-1">
                     {item.speakers.map((speaker, j) => (
                       <li
@@ -229,7 +237,7 @@ export default function ScheduleSection() {
                       </li>
                     ))}
                   </ul>
-                )}
+                ) : null}
               </div>
             </div>
           ))}
