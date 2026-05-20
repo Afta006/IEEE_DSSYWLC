@@ -1,20 +1,33 @@
 /**
  * Google Sheets integration — pushes new registrations to a Google Sheet
- * via a Google Apps Script Web App (deployed as webhook).
+ * using the Google Sheets API v4 with a service account.
  *
- * The webhook URL is set via GOOGLE_SHEET_WEBHOOK_URL in .env.local
+ * This replaces the Google Apps Script webhook approach because
+ * Google blocks Apps Script web-app requests from cloud IPs (Vercel / AWS).
  *
- * Google Apps Script web apps respond with a 302 redirect.
- * From cloud environments (Vercel / AWS) the default fetch may get a 404
- * because Next.js extends `fetch` with caching behaviour and Google may
- * block requests without a recognisable User-Agent.
- *
- * Strategy: POST with redirect:"manual", then manually follow the
- * redirect Location so the body is never dropped and we bypass any
- * Next.js fetch-layer caching.
+ * Required env vars:
+ *   GOOGLE_SHEET_ID              — The spreadsheet ID from the Sheet URL
+ *   GOOGLE_SERVICE_ACCOUNT_EMAIL — Service account email (xxx@xxx.iam.gserviceaccount.com)
+ *   GOOGLE_PRIVATE_KEY           — The private key from the service account JSON (with \n kept)
  */
 
-const WEBHOOK_URL = () => process.env.GOOGLE_SHEET_WEBHOOK_URL;
+import { google } from "googleapis";
+
+function getAuth() {
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const key = process.env.GOOGLE_PRIVATE_KEY;
+
+  if (!email || !key) {
+    return null;
+  }
+
+  return new google.auth.JWT({
+    email,
+    // Vercel stores env vars with literal "\n" — convert to actual newlines
+    key: key.replace(/\\n/g, "\n"),
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+}
 
 export async function pushRegistrationToSheet(data: {
   profileToken: string;
@@ -31,71 +44,55 @@ export async function pushRegistrationToSheet(data: {
   paymentScreenshotS3Key: string;
   registrationStatus: string;
 }): Promise<boolean> {
-  const url = WEBHOOK_URL();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  const auth = getAuth();
 
-  if (!url) {
-    console.warn("GOOGLE_SHEET_WEBHOOK_URL not set — skipping sheet sync.");
+  if (!auth || !sheetId) {
+    console.warn(
+      "Google Sheets API credentials not configured — skipping sheet sync. " +
+        `(GOOGLE_SHEET_ID: ${sheetId ? "set" : "MISSING"}, ` +
+        `SERVICE_ACCOUNT: ${auth ? "set" : "MISSING"})`
+    );
     return false;
   }
 
-  const payload = JSON.stringify({
-    action: "new_registration",
-    siteUrl:
-      process.env.NEXT_PUBLIC_SITE_URL || "https://ieee-dssywlc.vercel.app",
-    ...data,
-    timestamp: new Date().toISOString(),
-  });
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://ieee-dssywlc.vercel.app";
+  const profileLink =
+    siteUrl + "/profiles?token=" + encodeURIComponent(data.profileToken);
+
+  // Row values — must match the header order in the spreadsheet
+  const row = [
+    new Date().toISOString(),           // A: Timestamp
+    data.fullName,                      // B: Full Name
+    data.email,                         // C: Email
+    data.phone,                         // D: Phone
+    data.affiliation,                   // E: College / Org
+    data.category,                      // F: Category
+    data.referralCode || "",            // G: Referral Code
+    data.isMember ? "Yes" : "No",       // H: IEEE Member?
+    data.ieeeId || "",                  // I: IEEE ID
+    data.studentBranchCode || "",       // J: Branch Code
+    data.ieeeCardS3Key || "",           // K: IEEE Card (S3)
+    data.paymentScreenshotS3Key || "",  // L: Payment Screenshot (S3)
+    profileLink,                        // M: Profile Link
+    data.registrationStatus || "under_review", // N: Status
+    "",                                 // O: Admin Remarks
+  ];
 
   try {
-    // Use redirect:"manual" so we control the redirect chain ourselves
-    // and avoid Next.js fetch caching / Google blocking issues.
-    const initial = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain",
-        "User-Agent": "IEEE-DSSYWLC-Server/1.0",
+    const sheets = google.sheets({ version: "v4", auth });
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "Sheet1!A:O",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [row],
       },
-      body: payload,
-      redirect: "manual",
-      cache: "no-store",
     });
 
-    // Google Apps Script returns a 302 redirect — follow it manually
-    if (initial.status >= 300 && initial.status < 400) {
-      const redirectUrl = initial.headers.get("location");
-      if (redirectUrl) {
-        const finalRes = await fetch(redirectUrl, {
-          cache: "no-store",
-          headers: {
-            "User-Agent": "IEEE-DSSYWLC-Server/1.0",
-          },
-        });
-        if (!finalRes.ok) {
-          const body = await finalRes.text();
-          console.error(
-            "Google Sheet webhook redirect failed:",
-            finalRes.status,
-            body.substring(0, 200)
-          );
-          return false;
-        }
-        console.log("Google Sheet sync OK (via redirect)");
-        return true;
-      }
-    }
-
-    // If no redirect, check direct response
-    if (!initial.ok) {
-      const body = await initial.text();
-      console.error(
-        "Google Sheet webhook failed:",
-        initial.status,
-        body.substring(0, 200)
-      );
-      return false;
-    }
-
-    console.log("Google Sheet sync OK (direct)");
+    console.log("Google Sheet sync OK via Sheets API");
     return true;
   } catch (error) {
     console.error("Failed to push to Google Sheet:", error);
