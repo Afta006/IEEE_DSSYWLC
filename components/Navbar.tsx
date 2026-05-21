@@ -23,7 +23,7 @@ export default function Navbar() {
         {/* Logo + Brand */}
         <Link href="/" className="flex items-center gap-3">
           <img
-            src="/logos/DSSYWLC Logo (3).png"
+            src="/logos/dssywlc-logo.png"
             alt="DSSYWLC '25"
             className="h-14 w-auto object-contain"
           />

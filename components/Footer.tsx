@@ -7,19 +7,19 @@ export default function Footer() {
         {/* Logo Strip */}
         <div className="flex flex-wrap items-center justify-center gap-8 mb-12 pb-10 border-b border-white/10">
           <img
-            src="/logos/DSSYWLC Logo (3).png"
+            src="/logos/dssywlc-logo.png"
             alt="DSSYWLC '25"
             className="h-14 w-auto object-contain"
           />
           <div className="bg-white/90 rounded-lg px-3 py-2">
             <img
-              src="/logos/ssn logo.png"
+              src="/logos/ssn-logo.png"
               alt="IEEE NSUT"
               className="h-12 w-auto object-contain"
             />
           </div>
           <img
-            src="/logos/ieee_newlogo.png"
+            src="/logos/ieee-logo.png"
             alt="IEEE Delhi Section SAC"
             className="h-11 w-auto object-contain"
           />
