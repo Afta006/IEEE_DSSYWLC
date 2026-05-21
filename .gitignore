@@ -46,17 +46,15 @@ IEEE_DSSYWLC'24 Images/
 DSSYWLC ITINERARY.pdf
 dssywlc-main/
 dssywlc-main.zip
-public/logos/
-public/speakers/
 
-# avoid committing heavy binary media
-*.jpg
-*.jpeg
-*.png
-*.gif
-*.webp
-*.heic
+# avoid committing heavy binary media OUTSIDE public/
+# (public/ images are allowed so they deploy correctly)
 *.mp4
 *.mov
 *.avi
 *.mkv
+*.heic
+
+# Test / debug scripts
+test-*.cjs
+test-*.mjs
