@@ -81,42 +81,20 @@ export async function submitRegistration(
   const normalizedEmail = step1Parsed.data.email.trim().toLowerCase();
 
   try {
-    const existingEmail = await db
+    const existing = await db
       .select({ profileToken: registrations.profileToken })
       .from(registrations)
       .where(eq(registrations.email, normalizedEmail))
       .limit(1);
 
-    if (existingEmail.length > 0) {
-      return {
-        success: false,
-        message:
-          "This email address has already been used for registration. Each participant can only register once.",
-      };
-    }
-
-    const normalizedPhone = step1Parsed.data.phone.trim();
-    const existingPhone = await db
-      .select({ profileToken: registrations.profileToken })
-      .from(registrations)
-      .where(eq(registrations.phone, normalizedPhone))
-      .limit(1);
-
-    if (existingPhone.length > 0) {
-      return {
-        success: false,
-        message:
-          "This phone number has already been used for registration. Each participant can only register once.",
-      };
-    }
-
-    const profileToken = randomBytes(32).toString("hex");
+    const profileToken =
+      existing[0]?.profileToken ?? randomBytes(32).toString("hex");
 
     const values = {
       profileToken,
       fullName: step1Parsed.data.fullName.trim(),
       email: normalizedEmail,
-      phone: normalizedPhone,
+      phone: step1Parsed.data.phone.trim(),
       affiliation: step1Parsed.data.affiliation.trim(),
       category: step2Parsed.data.category,
       referralCode: step2Parsed.data.referralCode?.trim() || null,
@@ -135,7 +113,10 @@ export async function submitRegistration(
       updatedAt: now,
     };
 
-    await db.insert(registrations).values(values);
+    await db.insert(registrations).values(values).onConflictDoUpdate({
+      target: registrations.email,
+      set: values,
+    });
 
     const emailSent = await sendConfirmationEmail(
       normalizedEmail,
