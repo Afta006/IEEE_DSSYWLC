@@ -1,4 +1,26 @@
-import nodemailer from "nodemailer";
+/**
+ * Email integration — sends transactional emails via the Brevo API.
+ *
+ * Uses the Brevo HTTP API (not SMTP) to avoid IP-restriction issues
+ * that occur on cloud platforms like Vercel.
+ *
+ * Required env vars:
+ *   BREVO_API_KEY    — Brevo API key (xkeysib-...)
+ *   BREVO_FROM_EMAIL — Sender email (e.g. no-reply@ieeensut.com)
+ *   BREVO_FROM_NAME  — Sender display name
+ */
+
+function getEmailConfig() {
+  const apiKey = process.env.BREVO_API_KEY;
+  const fromEmail = process.env.BREVO_FROM_EMAIL;
+  const fromName = process.env.BREVO_FROM_NAME || "DSSYWLC 2026";
+
+  if (!apiKey || !fromEmail) {
+    return null;
+  }
+
+  return { apiKey, fromEmail, fromName };
+}
 
 function getSiteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
@@ -7,27 +29,54 @@ function getSiteUrl(): string {
   );
 }
 
-function getSmtpConfig() {
-  const host = process.env.BREVO_SMTP_HOST;
-  const port = Number(process.env.BREVO_SMTP_PORT || "587");
-  const user = process.env.BREVO_SMTP_USER;
-  const pass = process.env.BREVO_SMTP_PASS;
-  const fromEmail = process.env.BREVO_FROM_EMAIL;
-  const fromName = process.env.BREVO_FROM_NAME || "DSSYWLC 2025";
+async function sendEmail({
+  to,
+  subject,
+  textContent,
+  htmlContent,
+}: {
+  to: string;
+  subject: string;
+  textContent: string;
+  htmlContent: string;
+}): Promise<boolean> {
+  const config = getEmailConfig();
 
-  if (!host || !user || !pass || !fromEmail || Number.isNaN(port)) {
-    return null;
+  if (!config) {
+    console.warn("Brevo API not configured. Skipping email send.");
+    return false;
   }
 
-  return {
-    host,
-    port,
-    secure: port === 465,
-    user,
-    pass,
-    fromEmail,
-    fromName,
-  };
+  try {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "api-key": config.apiKey,
+      },
+      body: JSON.stringify({
+        sender: { name: config.fromName, email: config.fromEmail },
+        to: [{ email: to }],
+        subject,
+        textContent,
+        htmlContent,
+      }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error("Brevo API error:", response.status, errorBody);
+      return false;
+    }
+
+    console.log("Email sent successfully to", to);
+    return true;
+  } catch (error) {
+    console.error("Failed to send email:", error);
+    return false;
+  }
 }
 
 export async function sendConfirmationEmail(
@@ -35,64 +84,39 @@ export async function sendConfirmationEmail(
   name: string,
   profileToken: string
 ): Promise<boolean> {
-  const config = getSmtpConfig();
-
-  if (!config) {
-    console.warn("Brevo SMTP is not fully configured. Skipping email send.");
-    return false;
-  }
-
   const profileUrl = `${getSiteUrl()}/profiles?token=${encodeURIComponent(
     profileToken
   )}`;
 
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
+  return sendEmail({
+    to,
+    subject: "DSSYWLC 2026 — Registration Received",
+    textContent: [
+      `Hi ${name},`,
+      "",
+      "Your DSSYWLC 2026 registration has been received.",
+      "Current status: Under review",
+      "",
+      `Track your profile here: ${profileUrl}`,
+      "",
+      "DSSYWLC 2026",
+    ].join("\n"),
+    htmlContent: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+        <p>Hi ${name},</p>
+        <p>Your DSSYWLC 2026 registration has been received.</p>
+        <p><strong>Status:</strong> Under review</p>
+        <p>
+          You can view your registration profile here:<br />
+          <a href="${profileUrl}">${profileUrl}</a>
+        </p>
+        <p>Thank you for registering for DSSYWLC 2026.</p>
+        <p style="margin-top: 24px; color: #6b7280; font-size: 13px;">
+          Delhi Section Student, Young Professionals, Women in Engineering &amp; Life Members Congress
+        </p>
+      </div>
+    `,
   });
-
-  try {
-    await transporter.sendMail({
-      from: `"${config.fromName}" <${config.fromEmail}>`,
-      to,
-      subject: "DSSYWLC 2025 — Registration Received",
-      text: [
-        `Hi ${name},`,
-        "",
-        "Your DSSYWLC 2025 registration has been received.",
-        "Current status: Under review",
-        "",
-        `Track your profile here: ${profileUrl}`,
-        "",
-        "DSSYWLC 2025",
-      ].join("\n"),
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-          <p>Hi ${name},</p>
-          <p>Your DSSYWLC 2025 registration has been received.</p>
-          <p><strong>Status:</strong> Under review</p>
-          <p>
-            You can view your registration profile here:<br />
-            <a href="${profileUrl}">${profileUrl}</a>
-          </p>
-          <p>Thank you for registering for DSSYWLC 2025.</p>
-          <p style="margin-top: 24px; color: #6b7280; font-size: 13px;">
-            Delhi Section Student, Young Professionals, Women in Engineering &amp; Life Members Congress
-          </p>
-        </div>
-      `,
-    });
-
-    return true;
-  } catch (error) {
-    console.error("Failed to send confirmation email:", error);
-    return false;
-  }
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
@@ -109,73 +133,48 @@ export async function sendStatusUpdateEmail(
   profileToken: string,
   remarks: string | null
 ): Promise<boolean> {
-  const config = getSmtpConfig();
-
-  if (!config) {
-    console.warn("Brevo SMTP not configured. Skipping status email.");
-    return false;
-  }
-
   const profileUrl = `${getSiteUrl()}/profiles?token=${encodeURIComponent(
     profileToken
   )}`;
 
   const statusInfo = STATUS_LABELS[newStatus] || STATUS_LABELS.under_review;
 
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-  });
-
   const remarksBlock = remarks
     ? `<p style="background: #fef3c7; padding: 12px; border-radius: 6px; border-left: 4px solid #d97706;"><strong>Reviewer Remarks:</strong><br/>${remarks}</p>`
     : "";
 
-  try {
-    await transporter.sendMail({
-      from: `"${config.fromName}" <${config.fromEmail}>`,
-      to,
-      subject: `DSSYWLC 2025 — Registration ${statusInfo.label}`,
-      text: [
-        `Hi ${name},`,
-        "",
-        `Your DSSYWLC 2025 registration status has been updated to: ${statusInfo.label}`,
-        "",
-        remarks ? `Reviewer remarks: ${remarks}` : "",
-        "",
-        `View your profile: ${profileUrl}`,
-        "",
-        "DSSYWLC 2025",
-      ]
-        .filter(Boolean)
-        .join("\n"),
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-          <p>Hi ${name},</p>
-          <p>Your DSSYWLC 2025 registration status has been updated:</p>
-          <p style="font-size: 18px;">
-            <strong style="color: ${statusInfo.color};">${statusInfo.label}</strong>
-          </p>
-          ${remarksBlock}
-          <p>
-            View your registration profile:<br />
-            <a href="${profileUrl}">${profileUrl}</a>
-          </p>
-          <p style="margin-top: 24px; color: #6b7280; font-size: 13px;">
-            Delhi Section Student, Young Professionals, Women in Engineering & Life Members Congress
-          </p>
-        </div>
-      `,
-    });
-
-    return true;
-  } catch (error) {
-    console.error("Failed to send status update email:", error);
-    return false;
-  }
+  return sendEmail({
+    to,
+    subject: `DSSYWLC 2026 — Registration ${statusInfo.label}`,
+    textContent: [
+      `Hi ${name},`,
+      "",
+      `Your DSSYWLC 2026 registration status has been updated to: ${statusInfo.label}`,
+      "",
+      remarks ? `Reviewer remarks: ${remarks}` : "",
+      "",
+      `View your profile: ${profileUrl}`,
+      "",
+      "DSSYWLC 2026",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    htmlContent: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+        <p>Hi ${name},</p>
+        <p>Your DSSYWLC 2026 registration status has been updated:</p>
+        <p style="font-size: 18px;">
+          <strong style="color: ${statusInfo.color};">${statusInfo.label}</strong>
+        </p>
+        ${remarksBlock}
+        <p>
+          View your registration profile:<br />
+          <a href="${profileUrl}">${profileUrl}</a>
+        </p>
+        <p style="margin-top: 24px; color: #6b7280; font-size: 13px;">
+          Delhi Section Student, Young Professionals, Women in Engineering & Life Members Congress
+        </p>
+      </div>
+    `,
+  });
 }
