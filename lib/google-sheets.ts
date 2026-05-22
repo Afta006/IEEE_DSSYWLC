@@ -83,16 +83,49 @@ export async function pushRegistrationToSheet(data: {
   try {
     const sheets = google.sheets({ version: "v4", auth });
 
-    await sheets.spreadsheets.values.append({
+    // Check if this email already exists in the sheet
+    const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "Sheet1!A:O",
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [row],
-      },
+      range: "Sheet1!C:C", // Email column
     });
 
-    console.log("Google Sheet sync OK via Sheets API");
+    let existingRow = -1;
+    if (existing.data.values) {
+      for (let i = 0; i < existing.data.values.length; i++) {
+        if (
+          existing.data.values[i][0] &&
+          existing.data.values[i][0].toString().trim().toLowerCase() ===
+            data.email.trim().toLowerCase()
+        ) {
+          existingRow = i + 1; // 1-indexed
+        }
+      }
+    }
+
+    if (existingRow > 1) {
+      // Update existing row (keep original timestamp in column A)
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `Sheet1!B${existingRow}:O${existingRow}`,
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [row.slice(1)], // Skip timestamp, update B onwards
+        },
+      });
+      console.log(`Google Sheet: updated existing row ${existingRow} for ${data.email}`);
+    } else {
+      // Append new row
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: "Sheet1!A:O",
+        valueInputOption: "USER_ENTERED",
+        requestBody: {
+          values: [row],
+        },
+      });
+      console.log("Google Sheet: appended new row for", data.email);
+    }
+
     return true;
   } catch (error) {
     console.error("Failed to push to Google Sheet:", error);
