@@ -28,7 +28,7 @@ export default function SpeakersSection() {
     {
       name: "Dr. S.S. Jamuar",
       role: "Delhi Section LMAG Secretary",
-      img: "https://res.cloudinary.com/dlia5xgwx/image/upload/v1770186780/mnhoda_thmusc.jpg",
+      img: "",
     },
     {
       name: "Ms. Sneha Kabra",
@@ -58,12 +58,18 @@ export default function SpeakersSection() {
               key={i}
               className="bg-white rounded-lg border border-gray-200 p-6 text-center hover:shadow-lg transition-shadow"
             >
-              <div className="w-28 h-28 mx-auto mb-5 rounded-full overflow-hidden border-4 border-white shadow-md">
-                <img
-                  src={speaker.img}
-                  alt={speaker.name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="w-28 h-28 mx-auto mb-5 rounded-full overflow-hidden border-4 border-white shadow-md bg-slate-100 flex items-center justify-center">
+                {speaker.img ? (
+                  <img
+                    src={speaker.img}
+                    alt={speaker.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <svg className="w-12 h-12 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                )}
               </div>
               <h3 className="text-slate-800 font-bold text-sm mb-1">
                 {speaker.name}
