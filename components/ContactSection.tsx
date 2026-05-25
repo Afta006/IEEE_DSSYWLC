@@ -59,21 +59,21 @@ export default function ContactSection() {
                   </h5>
                   <div className="space-y-2 text-sm text-gray-600">
                     <p>
-                      Alex Johnson —{" "}
+                      Aditya Mishra —{" "}
                       <a
-                        href="tel:+919876543210"
+                        href="tel:+918826490096"
                         className="text-[#7B1F34] hover:underline"
                       >
-                        +91 98765 43210
+                        88264 90096
                       </a>
                     </p>
                     <p>
-                      Sarah Williams —{" "}
+                      Akshat Kacodia —{" "}
                       <a
-                        href="tel:+919876543211"
+                        href="tel:+919310823970"
                         className="text-[#7B1F34] hover:underline"
                       >
-                        +91 98765 43211
+                        93108 23970
                       </a>
                     </p>
                   </div>
@@ -83,24 +83,8 @@ export default function ContactSection() {
                     IEEE Student Section Representatives
                   </h5>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p>
-                      Michael Brown —{" "}
-                      <a
-                        href="tel:+919876543212"
-                        className="text-[#7B1F34] hover:underline"
-                      >
-                        +91 98765 43212
-                      </a>
-                    </p>
-                    <p>
-                      Emily Davis —{" "}
-                      <a
-                        href="tel:+919876543213"
-                        className="text-[#7B1F34] hover:underline"
-                      >
-                        +91 98765 43213
-                      </a>
-                    </p>
+                    <p>Garima Singh</p>
+                    <p>Shubham Gupta</p>
                   </div>
                 </div>
               </div>
