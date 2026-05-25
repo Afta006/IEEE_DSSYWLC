@@ -112,9 +112,17 @@ export async function generatePresignedUploadUrl({
     Bucket: requiredEnv("S3_BUCKET_NAME"),
     Key: key,
     ContentType: contentType,
+    ACL: "public-read",
   });
 
   const url = await getSignedUrl(getS3Client(), command, { expiresIn: 300 });
 
   return { url, key };
+}
+
+/** Build a permanent public URL for an S3 object given its key. */
+export function buildS3PublicUrl(key: string): string {
+  const bucket = process.env.S3_BUCKET_NAME || "";
+  const region = process.env.S3_REGION || "ap-south-1";
+  return `https://${bucket}.s3.${region}.amazonaws.com/${encodeURI(key)}`;
 }

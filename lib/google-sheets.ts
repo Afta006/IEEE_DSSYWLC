@@ -12,6 +12,7 @@
  */
 
 import { google } from "googleapis";
+import { buildS3PublicUrl } from "@/lib/s3";
 
 function getAuth() {
   const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
@@ -73,8 +74,8 @@ export async function pushRegistrationToSheet(data: {
     data.isMember ? "Yes" : "No",       // H: IEEE Member?
     data.ieeeId || "",                  // I: IEEE ID
     data.studentBranchCode || "",       // J: Branch Code
-    data.ieeeCardS3Key || "",           // K: IEEE Card (S3)
-    data.paymentScreenshotS3Key || "",  // L: Payment Screenshot (S3)
+    data.ieeeCardS3Key ? buildS3PublicUrl(data.ieeeCardS3Key) : "",           // K: IEEE Card (URL)
+    data.paymentScreenshotS3Key ? buildS3PublicUrl(data.paymentScreenshotS3Key) : "",  // L: Payment Screenshot (URL)
     profileLink,                        // M: Profile Link
     data.registrationStatus || "under_review", // N: Status
     "",                                 // O: Admin Remarks
