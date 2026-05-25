@@ -38,7 +38,7 @@ export default function SpeakersSection() {
     {
       name: "Prof. Arti M K",
       role: "Dean (Student Welfare), NSUT",
-      img: "/speakers/dsw-nsut.png",
+      img: "",
     },
   ];
 
