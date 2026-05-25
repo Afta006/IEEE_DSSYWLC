@@ -43,13 +43,19 @@ export default function ScheduleSection() {
       highlight: false,
     },
     {
-      time: "12:00 – 01:00 PM",
+      time: "12:00 – 12:30 PM",
+      title: "Breaking the Ice",
+      description: "",
+      highlight: true,
+    },
+    {
+      time: "12:30 – 01:15 PM",
       title: "Life Members Interacting with Young Professionals",
       description: "Senior IEEE Members engage with young professionals",
       highlight: false,
     },
     {
-      time: "01:00 – 02:00 PM",
+      time: "01:15 – 02:00 PM",
       title: "IEEE: Beyond Membership",
       description: "Guide to global IEEE resources",
       highlight: false,
@@ -61,7 +67,7 @@ export default function ScheduleSection() {
       highlight: false,
     },
     {
-      time: "03:00 – 05:00 PM",
+      time: "03:00 – 04:00 PM",
       title: "Women Who Led the Way — Panel Discussion",
       description:
         "WIE members talk about navigating male-dominated spaces in tech across different eras",
@@ -71,8 +77,14 @@ export default function ScheduleSection() {
       time: "04:00 – 05:15 PM",
       title: "Cryptic Hunt",
       description:
-        "Participants solve a chain of logic, tech, and cryptography-based puzzles simulating penetration testing",
+        "The event challenges participants to solve a chain of logic, tech, and cryptography-based puzzles that simulate the technical process of penetration testing and \"breaking through\" seven",
       highlight: false,
+    },
+    {
+      time: "05:15 – 06:00 PM",
+      title: "Any Event",
+      description: "",
+      highlight: true,
     },
     {
       time: "06:00 – 07:00 PM",

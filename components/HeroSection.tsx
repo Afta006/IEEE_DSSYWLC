@@ -59,6 +59,11 @@ export default function HeroSection() {
                 alt="IEEE Delhi Section Student Activities Committee"
                 className="h-12 w-auto object-contain"
               />
+              <img
+                src="/logos/wie logo purple.png"
+                alt="IEEE Women in Engineering"
+                className="h-12 w-auto object-contain"
+              />
             </div>
           </div>
         </div>
