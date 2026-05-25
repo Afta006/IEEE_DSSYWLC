@@ -21,11 +21,13 @@ export default function Footer() {
             alt="IEEE Delhi Section SAC"
             className="h-11 w-auto object-contain"
           />
-          <img
-            src="/logos/wie logo purple.png"
-            alt="IEEE Women in Engineering"
-            className="h-11 w-auto object-contain"
-          />
+          <div className="bg-white rounded-lg px-3 py-1.5 flex items-center justify-center">
+            <img
+              src="/logos/wie logo purple.png"
+              alt="IEEE Women in Engineering"
+              className="h-9 w-auto object-contain"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">

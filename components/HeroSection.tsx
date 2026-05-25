@@ -6,7 +6,7 @@ export default function HeroSection() {
       {/* 1. Main Hero Area (Above Part with premium background picture) */}
       <div className="relative min-h-[75vh] flex items-center py-20 md:py-28 z-0">
         {/* Background Image with Dark Overlay for perfect contrast */}
-        <div 
+        <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/hero-bg.png')" }}
         >
@@ -45,44 +45,48 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* 2. Organized By Area (Below Part - Clean, separated white strip) */}
-      <div className="relative z-10 bg-white border-b border-gray-100 shadow-sm py-8 md:py-10">
-        <div className="section-container flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-12 animate-on-scroll">
-          <div className="flex-shrink-0">
-            <p className="text-gray-400 text-xs uppercase tracking-widest font-bold">
-              Organized by
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-6 sm:gap-10">
-            {/* Logos on clean white cards for premium aesthetics */}
-            <div className="bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center justify-center h-16 hover:shadow-md transition-shadow">
+      {/* 2. Organized By Area — fully centered, premium dark themed strip */}
+      <div className="relative z-10 bg-[#120205] border-t border-[#7B1F34]/25 py-6 md:py-8">
+        <div className="section-container animate-on-scroll">
+          {/* Label centered above */}
+          <p className="text-center text-[10px] uppercase tracking-[0.25em] font-bold text-white/40 mb-6">
+            Organized by
+          </p>
+          {/* Logos row — centered, with thin separators */}
+          <div className="flex flex-wrap items-center justify-center gap-0">
+            {/* DSSYWLC */}
+            <div className="flex items-center justify-center px-6 md:px-10 py-2 border-r border-white/10 last:border-r-0">
               <img
                 src="/logos/dssywlc-logo.png"
                 alt="DSSYWLC '25 — IEEE Delhi Section SAC"
-                className="h-12 w-auto object-contain"
+                className="h-12 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
               />
             </div>
-            <div className="bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center justify-center h-16 hover:shadow-md transition-shadow">
+            {/* NSUT Branch */}
+            <div className="flex items-center justify-center px-6 md:px-10 py-2 border-r border-white/10">
               <img
                 src="/logos/ssn-logo.png"
                 alt="IEEE NSUT Student Branch"
-                className="h-10 w-auto object-contain"
+                className="h-10 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
               />
             </div>
-            <div className="bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center justify-center h-16 hover:shadow-md transition-shadow">
+            {/* IEEE */}
+            <div className="flex items-center justify-center px-6 md:px-10 py-2 border-r border-white/10">
               <img
                 src="/logos/ieee-logo.png"
                 alt="IEEE Delhi Section Student Activities Committee"
-                className="h-8 w-auto object-contain"
+                className="h-8 w-auto object-contain opacity-85 hover:opacity-100 transition-opacity"
               />
             </div>
-            {/* WIE logo has a dedicated white container as requested */}
-            <div className="bg-white px-4 py-2 rounded-lg border border-gray-100 shadow-sm flex items-center justify-center h-16 hover:shadow-md transition-shadow">
-              <img
-                src="/logos/wie logo purple.png"
-                alt="IEEE Women in Engineering"
-                className="h-10 w-auto object-contain"
-              />
+            {/* WIE — white pill container so purple logo is visible */}
+            <div className="flex items-center justify-center px-6 md:px-10 py-2">
+              <div className="bg-white rounded-lg px-4 py-2 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+                <img
+                  src="/logos/wie logo purple.png"
+                  alt="IEEE Women in Engineering"
+                  className="h-9 w-auto object-contain"
+                />
+              </div>
             </div>
           </div>
         </div>
