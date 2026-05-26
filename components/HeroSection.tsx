@@ -10,16 +10,16 @@ export default function HeroSection() {
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: "url('/logos/image.png')" }}
         />
-
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-0"></div>
         {/* Hero Content */}
         <div className="relative z-10 section-container animate-on-scroll">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
+          <div className="max-w-4xl">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-tight drop-shadow-2xl">
               Delhi Section Student, Young Professionals &amp; Women in
               Engineering and Life member Congress
             </h1>
 
-            <p className="text-lg text-white/80 max-w-2xl mb-10 leading-relaxed">
+            <p className="text-lg text-white/90 max-w-2xl mb-10 leading-relaxed drop-shadow-md">
               Converging young minds, visionary women engineers, and distinguished
               life members for a future of innovation.
             </p>
