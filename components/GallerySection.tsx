@@ -326,7 +326,7 @@ export default function GallerySection() {
   const [activeYear, setActiveYear] = useState<YearKey>("2024");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState<Record<string, boolean>>({});
-  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const track2Ref = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -405,7 +405,7 @@ export default function GallerySection() {
     const speed = 0.5; // px per frame
 
     const animate = () => {
-      if (!isPaused && lightboxIndex === null) {
+      if (!isPausedRef.current && lightboxIndex === null) {
         // Row 1: scroll right
         scrollPosRef.current += speed;
         const singleSetWidth1 = track1.scrollWidth / 2;
@@ -432,7 +432,7 @@ export default function GallerySection() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isPaused, lightboxIndex, activeYear]);
+  }, [lightboxIndex, activeYear]);
 
   const handleImageLoad = (src: string) => {
     setIsLoaded((prev) => ({ ...prev, [src]: true }));
@@ -476,8 +476,8 @@ export default function GallerySection() {
       key={`${activeYear}-${item.src}-${globalIndex}`}
       className={`carousel-card ${isLoaded[item.src] ? "loaded" : ""}`}
       onClick={() => openLightbox(globalIndex)}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseEnter={() => { isPausedRef.current = true; }}
+      onMouseLeave={() => { isPausedRef.current = false; }}
     >
       {item.type === "video" ? (
         <div className="gallery-video-thumb">
